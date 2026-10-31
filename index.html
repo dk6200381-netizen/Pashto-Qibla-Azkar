@@ -7,148 +7,149 @@
 <title>پښتو قبله او اذکار</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f0f5f1;color:#173d30;font-family:Arial,sans-serif}
-header{background:#123d32;color:white;text-align:center;padding:24px}
-header h1{margin:5px}
-nav{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:12px}
-button{border:0;border-radius:12px;padding:12px 16px;background:#176b50;color:white;font-size:16px}
-main{max-width:600px;margin:auto;padding:12px}
-.card{background:white;border-radius:18px;padding:20px;margin:12px 0;text-align:center;box-shadow:0 3px 12px #0001}
-.compass{width:245px;height:245px;border:8px solid #176b50;border-radius:50%;margin:20px auto;position:relative;display:flex;align-items:center;justify-content:center;background:#f8fcf8}
-.north{position:absolute;top:8px;font-weight:bold;color:#c0392b}
-.needle{font-size:75px;color:#c28b24;transform:rotate(0deg)}
-.small{font-size:14px;color:#66776e;line-height:1.8}
-.azkar{text-align:right;line-height:2;font-size:19px}
-.count{font-size:25px;color:#176b50;font-weight:bold}
-[hidden]{display:none!important}
+body{margin:0;background:#f3f6f3;color:#17352c;font-family:Arial,sans-serif}
+header{background:#123d32;color:white;text-align:center;padding:24px 12px}
+header h2{margin:5px}
+nav{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;padding:12px}
+button{border:0;border-radius:12px;padding:12px 16px;background:#17634d;color:white;font-size:16px;cursor:pointer}
+button.active{background:#c28b24}
+main{max-width:650px;margin:auto;padding:12px}
+.card{background:white;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 3px 12px #0000000d}
+h3{color:#17634d;margin-top:0}
+#compass{width:230px;height:230px;border:8px solid #17634d;border-radius:50%;margin:20px auto;position:relative;display:flex;align-items:center;justify-content:center;background:#f8faf8}
+#needle{font-size:75px;color:#c28b24;transition:transform .15s}
+#north{position:absolute;top:8px;font-weight:bold}
+.big{font-size:30px;text-align:center;font-weight:bold;color:#17634d}
+.arabic{font-size:25px;line-height:2;text-align:center;color:#123d32;margin:12px 0}
+.translation{text-align:center;line-height:1.9;color:#555}
+.counter{text-align:center;font-size:40px;margin:15px}
+.hidden{display:none}
+.small{font-size:13px;color:#777;text-align:center}
 </style>
 </head>
 <body>
 <header>
-<h1>🕌 قبله او ورځني اذکار</h1>
-<p>ستاسو د عبادت ملګری</p>
+<h2>🕌 پښتو قبله او اذکار</h2>
+<p>د عبادت لپاره ستاسو ملګری</p>
 </header>
 
 <nav>
-<button onclick="show('qibla')">🧭 قبله نما</button>
-<button onclick="show('morning')">🌅 سهار اذکار</button>
-<button onclick="show('evening')">🌙 ماښام اذکار</button>
+<button class="active" onclick="showPage('qibla',this)">قبله</button>
+<button onclick="showPage('morning',this)">سهار اذکار</button>
+<button onclick="showPage('evening',this)">ماښام اذکار</button>
+<button onclick="showPage('tasbih',this)">تسبیح</button>
 </nav>
 
 <main>
-<section id="qibla" class="card">
-<h2>🧭 د قبلې سمت</h2>
-<div class="compass">
-<span class="north">شمال N</span>
-<div class="needle" id="needle">⬆</div>
+<section id="qibla" class="page">
+<div class="card">
+<h3>🧭 د قبلې کمپاس</h3>
+<div id="compass">
+<span id="north">شمال</span>
+<span id="needle">⬆</span>
 </div>
-<h2>۲۵۲.۷ درجې</h2>
-<p id="status" class="small">د کمپاس د فعالولو لپاره تڼۍ کېکاږئ.</p>
-<button onclick="startCompass()">کمپاس فعال کړه</button>
-<p class="small">موبایل افقي ونیسئ. د کمپاس دقت د موبایل په سنسر پورې تړلی دی.</p>
+<div class="big">۲۵۲.۷°</div>
+<p class="translation">د ښرنې لپاره اټکلي د قبلې زاویه</p>
+<button style="width:100%" onclick="startCompass()">کمپاس فعال کړه</button>
+<p class="small">موبایل هوار ونیسه او له فلزي شیانو لرې یې وساته. د کمپاس دقت د موبایل له سنسر سره تړلی دی.</p>
+</div>
 </section>
 
-<section id="morning" class="card" hidden>
-<h2>🌅 د سهار اذکار</h2>
+<section id="morning" class="page hidden">
+<div class="card">
+<h3>🌅 د سهار اذکار</h3>
 <div id="morningList"></div>
+</div>
 </section>
 
-<section id="evening" class="card" hidden>
-<h2>🌙 د ماښام اذکار</h2>
+<section id="evening" class="page hidden">
+<div class="card">
+<h3>🌇 د ماښام اذکار</h3>
 <div id="eveningList"></div>
+</div>
+</section>
+
+<section id="tasbih" class="page hidden">
+<div class="card">
+<h3>📿 ډیجیټل تسبیح</h3>
+<div class="counter" id="count">۰</div>
+<button style="width:100%;font-size:22px;padding:22px" onclick="addCount()">تسبیح +</button>
+<button style="width:100%;margin-top:10px;background:#a33" onclick="resetCount()">له سره پیل</button>
+</div>
 </section>
 </main>
 
 <script>
-function show(id){
-document.querySelectorAll('main section').forEach(s=>s.hidden=true);
-document.getElementById(id).hidden=false;
+function showPage(id,btn){
+ document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+ document.getElementById(id).classList.remove('hidden');
+ document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+ btn.classList.add('active');
 }
 
-const azkar=[
-["أَسْتَغْفِرُ اللَّهَ","له الله څخه بښنه غواړم",100],
-["سُبْحَانَ اللَّهِ وَبِحَمْدِهِ","الله پاک دی او د هغه ستاینه کوم",100],
-["لَا إِلَهَ إِلَّا اللَّهُ","له الله پرته بل معبود نشته",10],
-["سُبْحَانَ اللَّهِ","الله پاک دی",33],
-["الْحَمْدُ لِلَّهِ","ټولې ستاینې الله لره دي",33],
-["اللَّهُ أَكْبَرُ","الله تر ټولو لوی دی",34]
+const morning=[
+["أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ","سهار مو کړ او ټول واک د الله دی.",1],
+["سُبْحَانَ اللَّهِ وَبِحَمْدِهِ","الله پاک دی او د هغه ستاینه کوم.",100],
+["أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ","له الله بښنه غواړم او هغه ته توبه کوم.",100],
+["اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبِيِّنَا مُحَمَّدٍ","اې الله! زموږ پر پیغمبر محمد ﷺ رحمت او سلام نازل کړه.",10]
 ];
 
-function makeAzkar(id){
-const area=document.getElementById(id);
-azkar.forEach((z,i)=>{
-const div=document.createElement('div');
-div.className='card azkar';
-div.innerHTML=`<b>${z[0]}</b><br>
-<span class="small">${z[1]}</span><br>
-<span class="count" id="${id}${i}">${z[2]}</span><br>
-<button onclick="countDown('${id}${i}')">تسبیح ووایه</button>
-<button onclick="resetCount('${id}${i}',${z[2]})">بیا پیل</button>`;
-area.appendChild(div);
-});
-}
-function countDown(id){
-let el=document.getElementById(id);
-let n=Number(el.innerText);
-if(n>0)el.innerText=n-1;
-}
-function resetCount(id,n){
-document.getElementById(id).innerText=n;
-}
-makeAzkar('morningList');
-makeAzkar('eveningList');
+const evening=[
+["أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ","ماښام مو کړ او ټول واک د الله دی.",1],
+["سُبْحَانَ اللَّهِ وَبِحَمْدِهِ","الله پاک دی او د هغه ستاینه کوم.",100],
+["أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ","له الله بښنه غواړم او هغه ته توبه کوم.",100],
+["اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبِيِّنَا مُحَمَّدٍ","اې الله! زموږ پر پیغمبر محمد ﷺ رحمت او سلام نازل کړه.",10]
+];
 
-const QIBLA=252.7;
-let compassStarted=false;
+function renderList(items,id){
+ document.getElementById(id).innerHTML=items.map((item,i)=>`
+ <div class="card">
+ <div class="arabic">${item[0]}</div>
+ <div class="translation">${item[1]}</div>
+ <p class="small">وړاندیز شوی شمېر: ${item[2]}</p>
+ <button onclick="this.innerText='لوستل وشول ✓';this.disabled=true">لوستل وشول</button>
+ </div>`).join('');
+}
+renderList(morning,'morningList');
+renderList(evening,'eveningList');
 
-function updateCompass(e){
-let heading=null;
-
-if(typeof e.webkitCompassHeading==='number'){
-heading=e.webkitCompassHeading;
-}else if(e.absolute===true && typeof e.alpha==='number'){
-heading=(360-e.alpha)%360;
-}else if(typeof e.alpha==='number' && e.absolute!==false){
-heading=(360-e.alpha)%360;
+let count=0;
+function toPashto(n){
+ return String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+}
+function addCount(){
+ count++;
+ document.getElementById('count').innerText=toPashto(count);
+}
+function resetCount(){
+ count=0;
+ document.getElementById('count').innerText='۰';
 }
 
-if(heading===null)return;
-
-const screenAngle=screen.orientation?.angle || 0;
-heading=(heading-screenAngle+360)%360;
-
-const rotation=(QIBLA-heading+360)%360;
-document.getElementById('needle').style.transform=
-`rotate(${rotation}deg)`;
-
-document.getElementById('status').innerText=
-'کمپاس معلومات ترلاسه کوي. موبایل ورو ورو وڅرخوئ.';
+function startCompass(){
+ if(typeof DeviceOrientationEvent!=='undefined' &&
+ typeof DeviceOrientationEvent.requestPermission==='function'){
+ DeviceOrientationEvent.requestPermission().then(permission=>{
+ if(permission==='granted') listenCompass();
+ else alert('د کمپاس اجازه ورکړه');
+ }).catch(()=>alert('کمپاس فعال نه شو'));
+ }else{
+ listenCompass();
+ }
 }
-
-async function startCompass(){
-const status=document.getElementById('status');
-
-if(!window.isSecureContext){
-status.innerText='دا پاڼه باید د HTTPS له لارې خلاصه شي.';
-return;
-}
-
-try{
-if(typeof DeviceOrientationEvent!=='undefined' &&
-typeof DeviceOrientationEvent.requestPermission==='function'){
-const permission=await DeviceOrientationEvent.requestPermission();
-if(permission!=='granted'){
-status.innerText='د کمپاس اجازه ورنه کړل شوه.';
-return;
-}
-}
-window.addEventListener('deviceorientation',updateCompass,true);
-window.addEventListener('deviceorientationabsolute',updateCompass,true);
-compassStarted=true;
-status.innerText='کمپاس فعال شو. موبایل هوار ونیسئ.';
-}catch(err){
-status.innerText='کمپاس فعال نه شو. د موبایل سنسر وګورئ.';
-}
+function listenCompass(){
+ window.addEventListener('deviceorientationabsolute',e=>{
+ if(e.alpha!==null){
+ document.getElementById('needle').style.transform=
+ 'rotate('+(252.7-e.alpha)+'deg)';
+ }
+ },true);
+ window.addEventListener('deviceorientation',e=>{
+ if(e.alpha!==null && !('ondeviceorientationabsolute' in window)){
+ document.getElementById('needle').style.transform=
+ 'rotate('+(252.7-e.alpha)+'deg)';
+ }
+ },true);
 }
 </script>
 </body>
