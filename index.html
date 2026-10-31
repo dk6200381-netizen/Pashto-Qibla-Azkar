@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ps" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#123d32">
+<title>قبله او اذکار</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f1f6f2;color:#183b30;font-family:Arial,sans-serif}
+header{background:#123d32;color:white;text-align:center;padding:25px 12px}
+header h1{margin:5px;font-size:27px}
+header p{margin:8px}
+nav{display:flex;justify-content:center;gap:8px;padding:12px;flex-wrap:wrap}
+button{border:0;border-radius:12px;padding:12px 18px;background:#176b50;color:white;font-size:16px;cursor:pointer}
+button:active{opacity:.7}
+main{max-width:600px;margin:auto;padding:12px}
+.card{background:white;border-radius:18px;padding:20px;margin:12px 0;box-shadow:0 3px 12px #00000010;text-align:center}
+.compass{width:230px;height:230px;border:8px solid #176b50;border-radius:50%;margin:20px auto;position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(white,#e8f4ec)}
+.needle{font-size:65px;color:#c28b24;transform:rotate(0deg)}
+.north{position:absolute;top:7px;font-weight:bold;color:#c0392b}
+.small{color:#64766d;font-size:14px}
+.azkar{text-align:right;line-height:2;font-size:19px}
+.count{font-size:25px;color:#176b50;font-weight:bold}
+footer{text-align:center;padding:25px;color:#667}
+</style>
+</head>
+<body>
+<header>
+<h1>🕌 قبله او ورځني اذکار</h1>
+<p>ستاسو د عبادت ملګری</p>
+</header>
+
+<nav>
+<button onclick="show('qibla')">🧭 قبله نما</button>
+<button onclick="show('morning')">🌅 سهار اذکار</button>
+<button onclick="show('evening')">🌙 ماښام اذکار</button>
+</nav>
+
+<main>
+<section id="qibla" class="card">
+<h2>🧭 د قبلې سمت</h2>
+<div class="compass">
+<span class="north">شمال N</span>
+<div class="needle" id="needle">⬆</div>
+</div>
+<h2 id="bearing">د موقعیت معلومولو ته انتظار</h2>
+<p id="status" class="small">د موقعیت اجازه ورکړئ، بیا موبایل ورو ورو وڅرخوئ.</p>
+<button onclick="startQibla()">د قبلې سمت معلوم کړه</button>
+<p class="small">دقیقې پایلې د موبایل د کمپاس او موقعیت په سم کار کولو پورې تړلې دي.</p>
+</section>
+
+<section id="morning" class="card" hidden>
+<h2>🌅 د سهار اذکار</h2>
+<div id="morningList"></div>
+</section>
+
+<section id="evening" class="card" hidden>
+<h2>🌙 د ماښام اذکار</h2>
+<div id="eveningList"></div>
+</section>
+</main>
+
+<footer>الله دې زموږ عبادتونه قبول کړي 🤲</footer>
+
+<script>
+function show(id){
+document.querySelectorAll('main section').forEach(s=>s.hidden=true);
+document.getElementById(id).hidden=false;
+}
+
+const azkar=[
+["سُبْحَانَ اللَّهِ وَبِحَمْدِهِ","الله پاک دی او د هغه ستاینه کوم",100],
+["أَسْتَغْفِرُ اللَّهَ","له الله څخه بښنه غواړم",100],
+["لَا إِلَهَ إِلَّا اللَّهُ","له الله پرته بل معبود نشته",10],
+["سُبْحَانَ اللَّهِ","الله پاک دی",33],
+["الْحَمْدُ لِلَّهِ","ټولې ستاینې الله لره دي",33],
+["اللَّهُ أَكْبَرُ","الله تر ټولو لوی دی",34]
+];
+
+function makeAzkar(id){
+let area=document.getElementById(id);
+azkar.forEach((z,i)=>{
+let div=document.createElement('div');
+div.className='card azkar';
+div.innerHTML=`<b>${z[0]}</b><br><span class="small">${z[1]}</span><br>
+<span class="count" id="${id}count${i}">${z[2]}</span><br>
+<button onclick="countDown('${id}',${i},${z[2]})">تسبیح ووایه</button>
+<button onclick="resetCount('${id}',${i},${z[2]})">بیا پیل</button>`;
+area.appendChild(div);
+});
+}
+function countDown(id,i,max){
+let el=document.getElementById(id+'count'+i);
+let n=Number(el.innerText);
+if(n>0)el.innerText=n-1;
+}
+function resetCount(id,i,max){
+document.getElementById(id+'count'+i).innerText=max;
+}
+makeAzkar('morningList');
+makeAzkar('eveningList');
+
+const kaabaLat=21.4225,kaabaLon=39.8262;
+let qibla=0,heading=null;
+
+function getBearing(lat1,lon1,lat2,lon2){
+let toRad=x=>x*Math.PI/180;
+let y=Math.sin(toRad(lon2-lon1))*Math.cos(toRad(lat2));
+let x=Math.cos(toRad(lat1))*Math.sin(toRad(lat2))-
+Math.sin(toRad(lat1))*Math.cos(toRad(lat2))*Math.cos(toRad(lon2-lon1));
+return (Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+
+function startQibla(){
+if(!navigator.geolocation){
+document.getElementById('status').innerText='دا موبایل موقعیت نه شي معلومولای.';
+return;
+}
+document.getElementById('status').innerText='موقعیت معلومېږي...';
+navigator.geolocation.getCurrentPosition(pos=>{
+qibla=getBearing(pos.coords.latitude,pos.coords.longitude,kaabaLat,kaabaLon);
+document.getElementById('bearing').innerText='د قبلې زاویه: '+Math.round(qibla)+'°';
+document.getElementById('status').innerText='اوس د کمپاس اجازه ورکړئ او موبایل ورو وڅرخوئ.';
+listenCompass();
+},()=>{
+document.getElementById('status').innerText='د موقعیت اجازه ورکړئ او انټرنېټ یا GPS وګورئ.';
+},{enableHighAccuracy:true,timeout:15000});
+}
+
+function listenCompass(){
+function update(e){
+if(e.webkitCompassHeading!==undefined){
+heading=e.webkitCompassHeading;
+}else if(e.alpha!==null){
+heading=(360-e.alpha)%360;
+}else{return;}
+let rotation=(qibla-heading+360)%360;
+document.getElementById('needle').style.transform=`rotate(${rotation}deg)`;
+document.getElementById('status').innerText='کمپاس فعال دی. د موبایل سمت ورو ورو بدل کړئ.';
+}
+if(typeof DeviceOrientationEvent!=='undefined' &&
+typeof DeviceOrientationEvent.requestPermission==='function'){
+DeviceOrientationEvent.requestPermission().then(result=>{
+if(result==='granted')window.addEventListener('deviceorientation',update,true);
+}).catch(()=>document.getElementById('status').innerText='د کمپاس اجازه ورنه کړل شوه.');
+}else{
+window.addEventListener('deviceorientationabsolute',update,true);
+window.addEventListener('deviceorientation',update,true);
+}
+}
+</script>
+</body>
+</html> 
