@@ -2,175 +2,189 @@ package com.pashto.qiblaazkar;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.*;
+
+import android.graphics.drawable.GradientDrawable;
 
 public class MainActivity extends Activity {
 
-    LinearLayout layout;
-    SharedPreferences prefs;
-    int count;
-    int green = Color.rgb(12, 65, 48);
-    int gold = Color.rgb(218, 174, 75);
+    LinearLayout main;
+    int green = Color.rgb(16, 75, 48);
+    int gold = Color.rgb(218, 177, 75);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        prefs = getSharedPreferences("Tasbih", MODE_PRIVATE);
-        count = prefs.getInt("count", 0);
-        home();
+        showHome();
+    }
+
+    GradientDrawable shape(int color) {
+        GradientDrawable d = new GradientDrawable();
+        d.setColor(color);
+        d.setCornerRadius(25);
+        return d;
+    }
+
+    TextView text(String value, int size, int color) {
+        TextView t = new TextView(this);
+        t.setText(value);
+        t.setTextSize(size);
+        t.setTextColor(color);
+        t.setGravity(Gravity.CENTER);
+        t.setPadding(16, 18, 16, 18);
+        t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        return t;
     }
 
     void setup(String title) {
         ScrollView scroll = new ScrollView(this);
-        layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setGravity(Gravity.CENTER);
-        layout.setPadding(22, 30, 22, 30);
-        layout.setBackgroundColor(Color.rgb(12, 65, 48));
 
-        TextView heading = new TextView(this);
-        heading.setText(title);
-        heading.setTextSize(27);
-        heading.setTextColor(gold);
-        heading.setGravity(Gravity.CENTER);
-        heading.setPadding(5, 20, 5, 25);
-        layout.addView(heading);
+        main = new LinearLayout(this);
+        main.setOrientation(LinearLayout.VERTICAL);
+        main.setPadding(18, 20, 18, 25);
+        main.setBackgroundColor(Color.rgb(245, 248, 242));
 
-        scroll.addView(layout);
+        scroll.addView(main);
         setContentView(scroll);
+
+        main.addView(text("🌙 پښتو قبله او اذکار", 25, green));
+        main.addView(text(title, 21, gold));
     }
 
-    void addButton(String name, final Runnable action) {
-        Button b = new Button(this);
-        b.setText(name);
-        b.setTextSize(18);
-        b.setTextColor(green);
-        b.setBackgroundTintList(
-            android.content.res.ColorStateList.valueOf(gold)
-        );
+    void addButton(String title, Runnable action) {
+        TextView b = text(title, 19, Color.WHITE);
+        b.setBackground(shape(green));
 
         LinearLayout.LayoutParams p =
-            new LinearLayout.LayoutParams(
-                -1, -2
-            );
-        p.setMargins(0, 9, 0, 9);
-        layout.addView(b, p);
+            new LinearLayout.LayoutParams(-1, -2);
 
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                action.run();
-            }
-        });
+        p.setMargins(5, 8, 5, 8);
+        main.addView(b, p);
+
+        b.setOnClickListener(v -> action.run());
     }
 
-    void addText(String value) {
-        TextView t = new TextView(this);
-        t.setText(value);
-        t.setTextSize(20);
-        t.setTextColor(Color.WHITE);
-        t.setGravity(Gravity.CENTER);
-        t.setPadding(12, 15, 12, 15);
-        layout.addView(t);
+    void showHome() {
+        setup("حنفي مذهب | ساده پښتو");
+
+        addButton("🕌 د لمانځه لارښود", () -> showPrayer());
+        addButton("💧 اودس او غسل", () -> showWudu());
+        addButton("📿 سهار او ماښام اذکار", () -> showAzkar());
+        addButton("🔢 تسبیح", () -> showTasbih());
+        addButton("🧭 د قبلې لوری", () -> showQibla());
+
+        main.addView(text(
+            "الله تعالی دې زموږ عبادتونه قبول کړي",
+            16, green
+        ));
     }
 
-    void home() {
-        setup("🕌 پښتو قبله او اذکار");
-        addText("ستاسو د عبادت ملګری");
+    void showPrayer() {
+        setup("د حنفي لمانځه لارښود");
 
-        addButton("🧭 د قبلې لوری", new Runnable() {
-            public void run() { qibla(); }
-        });
+        String[] steps = {
+            "۱- د لمانځه نیت کول",
+            "۲- تکبیر تحریمه: الله اکبر",
+            "۳- ثنا: سبحانك اللهم وبحمدك...",
+            "۴- تعوذ او بسم الله",
+            "۵- سورت فاتحه او بل سورت لوستل",
+            "۶- رکوع کول او تسبیح ویل",
+            "۷- له رکوع پورته کېدل",
+            "۸- دوه سجدې کول",
+            "۹- دوهم رکعت ادا کول",
+            "۱۰- قعده او التحیات لوستل",
+            "۱۱- درود شریف او دعا لوستل",
+            "۱۲- ښي او چپ لوري ته سلام ګرځول"
+        };
 
-        addButton("🌅 د سهار اذکار", new Runnable() {
-            public void run() { morning(); }
-        });
+        for (String s : steps) {
+            main.addView(text(s, 17, green));
+        }
 
-        addButton("🌙 د ماښام اذکار", new Runnable() {
-            public void run() { evening(); }
-        });
-
-        addButton("📿 تسبیح", new Runnable() {
-            public void run() { tasbih(); }
-        });
+        addButton("⬅ بېرته کور ته", () -> showHome());
     }
 
-    void qibla() {
-        setup("🧭 د قبلې لوری");
-        addText("د قبلې د دقیق لوري لپاره کمپاس ته اړتیا ده.");
-        addText("د کمپاس فعاله برخه به په راتلونکي پړاو کې ورزیاته کړو.");
-        addButton("بېرته کور ته", new Runnable() {
-            public void run() { home(); }
-        });
+    void showWudu() {
+        setup("د اوداسه طریقه");
+
+        String[] steps = {
+            "۱- د اوداسه نیت کول",
+            "۲- بسم الله ویل",
+            "۳- دواړه لاسونه درې ځله مینځل",
+            "۴- خوله درې ځله مینځل",
+            "۵- پوزې ته اوبه اچول",
+            "۶- ټول مخ مینځل",
+            "۷- دواړه لاسونه تر څنګلو مینځل",
+            "۸- د سر مسح کول",
+            "۹- دواړه پښې تر بجلکو مینځل"
+        };
+
+        for (String s : steps) {
+            main.addView(text(s, 17, green));
+        }
+
+        addButton("⬅ بېرته کور ته", () -> showHome());
     }
 
-    void morning() {
-        setup("🌅 د سهار اذکار");
+    void showAzkar() {
+        setup("سهار او ماښام اذکار");
 
-        addText("سُبْحَانَ اللَّهِ وَبِحَمْدِهِ");
-        addText("ژباړه: الله پاک دی او د هغه ستاینه کوم.");
+        main.addView(text(
+            "أَسْتَغْفِرُ اللَّهَ",
+            25, green
+        ));
 
-        addText("أَسْتَغْفِرُ اللَّهَ");
-        addText("ژباړه: له الله څخه بښنه غواړم.");
+        main.addView(text(
+            "ژباړه: له الله تعالی څخه بښنه غواړم.",
+            17, Color.BLACK
+        ));
 
-        addText("لَا إِلَهَ إِلَّا اللَّهُ");
-        addText("ژباړه: له الله پرته بل معبود نشته.");
+        main.addView(text(
+            "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+            23, green
+        ));
 
-        addButton("بېرته کور ته", new Runnable() {
-            public void run() { home(); }
-        });
+        main.addView(text(
+            "ژباړه: الله پاک دی او د هغه ستاینه کوم.",
+            17, Color.BLACK
+        ));
+
+        addButton("⬅ بېرته کور ته", () -> showHome());
     }
 
-    void evening() {
-        setup("🌙 د ماښام اذکار");
+    int count = 0;
+    TextView counter;
 
-        addText("أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ");
-        addText("ژباړه: ماښام مو شو او پاچاهي د الله ده.");
+    void showTasbih() {
+        setup("ډیجیټل تسبیح");
 
-        addText("أَسْتَغْفِرُ اللَّهَ");
-        addText("ژباړه: له الله څخه بښنه غواړم.");
+        counter = text("۰", 45, green);
+        main.addView(counter);
 
-        addText("سُبْحَانَ اللَّهِ");
-        addText("ژباړه: الله پاک دی.");
-
-        addButton("بېرته کور ته", new Runnable() {
-            public void run() { home(); }
+        addButton("➕ تسبیح", () -> {
+            count++;
+            counter.setText(String.valueOf(count));
         });
+
+        addButton("بیا له صفره شروع", () -> {
+            count = 0;
+            counter.setText("۰");
+        });
+
+        addButton("⬅ بېرته کور ته", () -> showHome());
     }
 
-    void tasbih() {
-        setup("📿 تسبیح");
+    void showQibla() {
+        setup("د قبلې لوری");
 
-        final TextView number = new TextView(this);
-        number.setText(String.valueOf(count));
-        number.setTextSize(55);
-        number.setTextColor(gold);
-        number.setGravity(Gravity.CENTER);
-        number.setPadding(10, 30, 10, 30);
-        layout.addView(number);
+        main.addView(text(
+            "د قبلې د دقیق لوري لپاره به په راتلونکې برخه کې د موبایل کمپاس ورزیات کړو.",
+            18, green
+        ));
 
-        addButton("تسبیح +", new Runnable() {
-            public void run() {
-                count++;
-                prefs.edit().putInt("count", count).apply();
-                number.setText(String.valueOf(count));
-            }
-        });
-
-        addButton("شمېر صفر کړه", new Runnable() {
-            public void run() {
-                count = 0;
-                prefs.edit().putInt("count", 0).apply();
-                number.setText("0");
-            }
-        });
-
-        addButton("بېرته کور ته", new Runnable() {
-            public void run() { home(); }
-        });
+        addButton("⬅ بېرته کور ته", () -> showHome());
     }
 } 
