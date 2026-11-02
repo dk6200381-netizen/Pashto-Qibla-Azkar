@@ -3,14 +3,21 @@ package com.pashto.qiblaazkar;
 import android.app.Activity;
 import android.os.Bundle;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.view.Gravity;
 import android.widget.*;
 import android.graphics.drawable.GradientDrawable;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
     LinearLayout main;
+    Spinner provinceSpinner, districtSpinner;
+    ArrayList<JSONObject> provinces = new ArrayList<>();
+    ArrayList<JSONObject> districts = new ArrayList<>();
+
     int green = Color.rgb(5, 45, 32);
     int gold = Color.rgb(218, 177, 75);
 
@@ -34,7 +41,6 @@ public class MainActivity extends Activity {
         t.setTextColor(color);
         t.setGravity(Gravity.CENTER);
         t.setPadding(15, 17, 15, 17);
-        t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         t.setTextDirection(android.view.View.TEXT_DIRECTION_RTL);
         return t;
     }
@@ -62,14 +68,78 @@ public class MainActivity extends Activity {
         b.setOnClickListener(v -> action.run());
     }
 
+    void loadData() {
+        provinces.clear();
+        try {
+            InputStream input =
+                getAssets().open("provinces-and-districts.json");
+            byte[] buffer = new byte[input.available()];
+            input.read(buffer);
+            input.close();
+
+            JSONArray array =
+                new JSONArray(new String(buffer, "UTF-8"));
+
+            for (int i = 0; i < array.length(); i++) {
+                provinces.add(array.getJSONObject(i));
+            }
+        } catch (Exception e) {
+            Toast.makeText(this,
+                "د ولایتونو فایل ونه موندل شو",
+                Toast.LENGTH_LONG).show();
+        }
+    }
+
+    String pashtoName(JSONObject item) {
+        String name = item.optString("namePa", "");
+        if (name.trim().isEmpty()) {
+            name = item.optString("name", "ناڅرګند");
+        }
+        return name;
+    }
+
     void showHome() {
         setup("د اسلامي معلوماتو مرکز");
 
-        addButton("🕌 د لمانځه لارښود", () -> showPrayer());
-        addButton("💧 اودس او غسل", () -> showWudu());
-        addButton("📿 سهار او ماښام اذکار", () -> showAzkar());
+        loadData();
+
+        main.addView(text("خپل ولایت او ولسوالي وټاکئ", 19, gold));
+
+        provinceSpinner = new Spinner(this);
+        ArrayList<String> provinceNames = new ArrayList<>();
+
+        for (JSONObject p : provinces) {
+            provinceNames.add(pashtoName(p));
+        }
+
+        ArrayAdapter<String> provinceAdapter =
+            new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, provinceNames);
+        provinceAdapter.setDropDownViewResource(
+            android.R.layout.simple_spinner_dropdown_item);
+        provinceSpinner.setAdapter(provinceAdapter);
+        main.addView(provinceSpinner);
+
+        districtSpinner = new Spinner(this);
+        main.addView(districtSpinner);
+
+        provinceSpinner.setOnItemSelectedListener(
+            new AdapterView.OnItemSelectedListener() {
+                public void onItemSelected(
+                    AdapterView<?> parent,
+                    android.view.View view,
+                    int position, long id) {
+                    loadDistricts(position);
+                }
+
+                public void onNothingSelected(AdapterView<?> parent) {}
+            });
+
+        addButton("🕌 د لمانځه لارښود", () -> showInfo("د لمانځه لارښود"));
+        addButton("💧 اودس او غسل", () -> showInfo("اودس او غسل"));
+        addButton("📿 سهار او ماښام اذکار", () -> showInfo("اذکار"));
         addButton("🔢 تسبیح", () -> showTasbih());
-        addButton("🧭 د قبلې لوری", () -> showQibla());
+        addButton("🧭 د قبلې لوری", () -> showInfo("د قبلې لوری"));
         addButton("👤 زما په اړه", () -> showAbout());
 
         main.addView(text(
@@ -77,108 +147,36 @@ public class MainActivity extends Activity {
             16, gold));
     }
 
-    void showAbout() {
-    setup("زما په اړه");
+    void loadDistricts(int position) {
+        districts.clear();
+        ArrayList<String> names = new ArrayList<>();
 
-    try {
-        java.io.InputStream input =
-            getAssets().open("profile.JPG");
+        try {
+            JSONObject province = provinces.get(position);
+            JSONArray array = province.getJSONArray("districts");
 
-        android.graphics.Bitmap bitmap =
-            android.graphics.BitmapFactory.decodeStream(input);
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject district = array.getJSONObject(i);
+                districts.add(district);
+                names.add(pashtoName(district));
+            }
+        } catch (Exception e) {
+            names.add("ولسوالۍ ونه موندل شوې");
+        }
 
-        input.close();
-
-        ImageView photo = new ImageView(this);
-        photo.setImageBitmap(bitmap);
-        photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
-        LinearLayout.LayoutParams p =
-            new LinearLayout.LayoutParams(500, 550);
-
-        p.gravity = Gravity.CENTER;
-        p.setMargins(5, 15, 5, 15);
-        main.addView(photo, p);
-
-    } catch (Exception e) {
-        main.addView(text("عکس ونه موندل شو", 16, Color.WHITE));
+        ArrayAdapter<String> adapter =
+            new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, names);
+        adapter.setDropDownViewResource(
+            android.R.layout.simple_spinner_dropdown_item);
+        districtSpinner.setAdapter(adapter);
     }
 
-    main.addView(text("دوست محمد حماد", 26, gold));
-    main.addView(text("د پلار نوم: حاجي محمد اسلم", 18, Color.WHITE));
-    main.addView(text("پکتیکا ولایت، مرکز ښرنه، شهاب‌الدین کلی", 17, Color.WHITE));
-    main.addView(text("زده کړې: شیخ زاید پوهنتون، د اقتصاد پوهنځی", 18, Color.WHITE));
-    main.addView(text("فېسبوک: دوست محمد حماد", 18, gold));
-
-    addButton("⬅ بېرته کور ته", () -> showHome());
-} 
-
-
-    void showPrayer() {
-        setup("د حنفي لمانځه لارښود");
-
-        String[] items = {
-            "۱- نیت کول",
-            "۲- الله اکبر ویل",
-            "۳- ثنا لوستل",
-            "۴- تعوذ او بسم الله",
-            "۵- فاتحه او بل سورت لوستل",
-            "۶- رکوع او تسبیح",
-            "۷- له رکوع پورته کېدل",
-            "۸- دوه سجدې",
-            "۹- دوهم رکعت",
-            "۱۰- التحیات",
-            "۱۱- درود شریف او دعا",
-            "۱۲- سلام ګرځول"
-        };
-
-        for (String s : items)
-            main.addView(text(s, 17, Color.WHITE));
-
-        addButton("⬅ بېرته کور ته", () -> showHome());
-    }
-
-    void showWudu() {
-        setup("اودس او غسل");
-
-        String[] items = {
-            "د اوداسه څلور فرضونه:",
-            "۱- د ټول مخ مینځل",
-            "۲- لاسونه تر څنګلو مینځل",
-            "۳- د سر د څلورمې برخې مسح",
-            "۴- پښې تر بجلکو مینځل",
-            "",
-            "د غسل درې فرضونه:",
-            "۱- خوله مینځل",
-            "۲- پوزې ته اوبه رسول",
-            "۳- ټول بدن مینځل"
-        };
-
-        for (String s : items)
-            main.addView(text(s, 17, Color.WHITE));
-
-        addButton("⬅ بېرته کور ته", () -> showHome());
-    }
-
-    void showAzkar() {
-        setup("سهار او ماښام اذکار");
-
-        String[] items = {
-            "آیت الکرسي - ۱ ځل",
-            "سورت اخلاص - ۳ ځله",
-            "سورت فلق - ۳ ځله",
-            "سورت ناس - ۳ ځله",
-            "بسم الله الذي لا يضر - ۳ ځله",
-            "رضيت بالله ربا - ۳ ځله",
-            "لا اله الا الله وحده - ۱۰ ځله",
-            "سید الاستغفار - ۱ ځل",
-            "سبحان الله وبحمده - ۱۰۰ ځله",
-            "درود شریف - ۱۰ ځله"
-        };
-
-        for (String s : items)
-            main.addView(text(s, 18, Color.WHITE));
-
+    void showInfo(String title) {
+        setup(title);
+        main.addView(text(
+            "دا برخه به په راتلونکې مرحله کې له بشپړو معلوماتو سره جوړه شي.",
+            18, Color.WHITE));
         addButton("⬅ بېرته کور ته", () -> showHome());
     }
 
@@ -187,7 +185,6 @@ public class MainActivity extends Activity {
 
     void showTasbih() {
         setup("ډیجیټل تسبیح");
-
         counter = text("۰", 45, gold);
         main.addView(counter);
 
@@ -204,11 +201,35 @@ public class MainActivity extends Activity {
         addButton("⬅ بېرته کور ته", () -> showHome());
     }
 
-    void showQibla() {
-        setup("د قبلې لوری");
-        main.addView(text(
-            "دقیق کمپاس به په راتلونکې نسخه کې ورزیات شي.",
+    void showAbout() {
+        setup("زما په اړه");
+
+        try {
+            InputStream input = getAssets().open("profile.JPG");
+            android.graphics.Bitmap bitmap =
+                android.graphics.BitmapFactory.decodeStream(input);
+            input.close();
+
+            ImageView photo = new ImageView(this);
+            photo.setImageBitmap(bitmap);
+            photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+            LinearLayout.LayoutParams p =
+                new LinearLayout.LayoutParams(500, 550);
+            p.gravity = Gravity.CENTER;
+            main.addView(photo, p);
+
+        } catch (Exception e) {
+            main.addView(text("عکس ونه موندل شو", 16, Color.WHITE));
+        }
+
+        main.addView(text("دوست محمد حماد", 26, gold));
+        main.addView(text("د پلار نوم: حاجي محمد اسلم", 18, Color.WHITE));
+        main.addView(text("پکتیکا ولایت، مرکز ښرنه، شهاب‌الدین کلی",
+            17, Color.WHITE));
+        main.addView(text("شیخ زاید پوهنتون، د اقتصاد پوهنځی",
             18, Color.WHITE));
+
         addButton("⬅ بېرته کور ته", () -> showHome());
     }
 } 
