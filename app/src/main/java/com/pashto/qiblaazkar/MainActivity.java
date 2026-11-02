@@ -78,37 +78,41 @@ public class MainActivity extends Activity {
     }
 
     void showAbout() {
-        setup("زما په اړه");
+    setup("زما په اړه");
 
-        int id = getResources().getIdentifier(
-            "profile", "drawable", getPackageName());
+    try {
+        java.io.InputStream input =
+            getAssets().open("profile.JPG");
 
-        if (id != 0) {
-            ImageView photo = new ImageView(this);
-            photo.setImageResource(id);
-            photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        android.graphics.Bitmap bitmap =
+            android.graphics.BitmapFactory.decodeStream(input);
 
-            LinearLayout.LayoutParams p =
-                new LinearLayout.LayoutParams(500, 550);
-            p.gravity = Gravity.CENTER;
-            p.setMargins(5, 15, 5, 15);
-            main.addView(photo, p);
-        }
+        input.close();
 
-        main.addView(text("دوست محمد حماد", 26, gold));
-        main.addView(text(
-            "د پلار نوم: حاجي محمد اسلم", 18, Color.WHITE));
-        main.addView(text(
-            "زېږېدنه: پکتیکا ولایت، مرکز ښرنه، شهاب الدین کلی",
-            17, Color.WHITE));
-        main.addView(text(
-            "زده کړې: شیخ زاید پوهنتون، د اقتصاد پوهنځی",
-            18, Color.WHITE));
-        main.addView(text(
-            "فېسبوک: دوست محمد حماد", 18, gold));
+        ImageView photo = new ImageView(this);
+        photo.setImageBitmap(bitmap);
+        photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-        addButton("⬅ بېرته کور ته", () -> showHome());
+        LinearLayout.LayoutParams p =
+            new LinearLayout.LayoutParams(500, 550);
+
+        p.gravity = Gravity.CENTER;
+        p.setMargins(5, 15, 5, 15);
+        main.addView(photo, p);
+
+    } catch (Exception e) {
+        main.addView(text("عکس ونه موندل شو", 16, Color.WHITE));
     }
+
+    main.addView(text("دوست محمد حماد", 26, gold));
+    main.addView(text("د پلار نوم: حاجي محمد اسلم", 18, Color.WHITE));
+    main.addView(text("پکتیکا ولایت، مرکز ښرنه، شهاب‌الدین کلی", 17, Color.WHITE));
+    main.addView(text("زده کړې: شیخ زاید پوهنتون، د اقتصاد پوهنځی", 18, Color.WHITE));
+    main.addView(text("فېسبوک: دوست محمد حماد", 18, gold));
+
+    addButton("⬅ بېرته کور ته", () -> showHome());
+} 
+
 
     void showPrayer() {
         setup("د حنفي لمانځه لارښود");
