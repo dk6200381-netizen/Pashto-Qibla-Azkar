@@ -173,12 +173,15 @@ public class MainActivity extends Activity {
     }
 
     void showInfo(String title) {
+    if (title.equals("د لمانځه لارښود")) {
+        showPrayer();
+    } else {
         setup(title);
-        main.addView(text(
-            "دا برخه به په راتلونکې مرحله کې له بشپړو معلوماتو سره جوړه شي.",
-            18, Color.WHITE));
+        main.addView(text("دا برخه به وروسته بشپړه شي", 18, Color.WHITE));
         addButton("⬅ بېرته کور ته", () -> showHome());
     }
+} 
+    
 
     int count = 0;
     TextView counter;
